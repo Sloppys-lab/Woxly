@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-vite
+release
+*.log
+.DS_Store
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: woxly-postgres
+    environment:
+      POSTGRES_USER: woxly
+      POSTGRES_PASSWORD: woxly_password
+      POSTGRES_DB: woxly
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - woxly-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: woxly-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - woxly-network
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    container_name: woxly-backend
+    environment:
+      DATABASE_URL: postgresql://woxly:woxly_password@postgres:5432/woxly?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-in-production}
+      PORT: 3001
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ../apps/backend/uploads:/app/uploads
+    networks:
+      - woxly-network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    container_name: woxly-frontend
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_WS_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - woxly-network
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: woxly-livekit
+    command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-secret}"
+    ports:
+      - "7880:7880"  # WebRTC
+      - "7881:7881"  # HTTP
+      - "7882:7882/udp"  # TURN/UDP
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    networks:
+      - woxly-network
+
+  coturn:
+    image: coturn/coturn:latest
+    container_name: woxly-coturn
+    environment:
+      TURN_USERNAME: ${TURN_USERNAME:-user}
+      TURN_PASSWORD: ${TURN_PASSWORD:-pass}
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "49152-65535:49152-65535/udp"
+    volumes:
+      - ./turnserver.conf:/etc/turnserver.conf
+    networks:
+      - woxly-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: woxly-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - woxly-network
+
+volumes:
+  postgres_data:
+
+networks:
+  woxly-network:
+    driver: bridge
+

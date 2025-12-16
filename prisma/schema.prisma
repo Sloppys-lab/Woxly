@@ -1,0 +1,240 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  online
+  away
+  busy
+  offline
+}
+
+enum RoomType {
+  DM
+  GROUP
+  VOICE
+}
+
+enum RoomMemberStatus {
+  pending
+  accepted
+  declined
+  left
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  declined
+  blocked
+}
+
+enum MessageType {
+  text
+  image
+  file
+  voice
+  system
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  woxlyId       String    @unique @default("") // WX + 4 цифры
+  email         String    @unique
+  username      String
+  userTag       String    // a-z 0-9 . _ -
+  passwordHash  String    @map("password_hash")
+  avatarUrl     String?   @map("avatar_url")
+  status        UserStatus @default(offline)
+  bio           String?   @default("")
+  badge         String?   // Бейдж пользователя: "creator", "admin", "moderator", "verified", "premium", "early_supporter"
+  badgeColor    String?   @map("badge_color") // Цвет бейджа в hex
+  emailVerified Boolean   @default(false) @map("email_verified")
+  emailCode     String?   @map("email_code")
+  
+  // 2FA
+  twoFactorSecret   String?  @map("two_factor_secret")
+  twoFactorEnabled  Boolean  @default(false) @map("two_factor_enabled")
+  
+  // E2E Encryption - публичный ключ для обмена зашифрованными сообщениями
+  publicKey     String?   @map("public_key")
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  sentFriendships     Friendship[] @relation("UserSent")
+  receivedFriendships Friendship[] @relation("UserReceived")
+  ownedRooms          Room[]       @relation("RoomOwner")
+  roomMembers         RoomMember[]
+  sentMessages        Message[]
+  reactions           MessageReaction[]
+  initiatedCalls      Call[]       @relation("CallInitiator")
+  receivedCalls       Call[]       @relation("CallReceiver")
+
+  @@index([woxlyId])
+  @@index([email])
+  @@index([username, userTag])
+  @@index([badge])
+  @@map("users")
+}
+
+model Friendship {
+  id        Int              @id @default(autoincrement())
+  userId    Int              @map("user_id")
+  friendId  Int              @map("friend_id")
+  status    FriendshipStatus @default(pending)
+  note      String?          @default("")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  user   User @relation("UserSent", fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation("UserReceived", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@index([status])
+  @@map("friendships")
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      RoomType
+  ownerId   Int      @map("owner_id")
+  isPrivate Boolean  @default(true) @map("is_private")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  owner      User         @relation("RoomOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members    RoomMember[]
+  messages   Message[]
+  calls      Call[]
+
+  @@index([ownerId])
+  @@index([type])
+  @@map("rooms")
+}
+
+model RoomMember {
+  id               Int              @id @default(autoincrement())
+  roomId           Int              @map("room_id")
+  userId           Int              @map("user_id")
+  status           RoomMemberStatus @default(pending)
+  joinedAt         DateTime?        @map("joined_at")
+  leftAt           DateTime?        @map("left_at")
+  lastReadAt       DateTime?        @map("last_read_at") // Для непрочитанных сообщений
+  customRoomName   String?          @map("custom_room_name") // Персональное название (только для DM)
+  customRoomAvatar String?          @map("custom_room_avatar") // Персональный аватар (только для DM)
+  createdAt        DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_members")
+}
+
+model Message {
+  id          Int         @id @default(autoincrement())
+  roomId      Int         @map("room_id")
+  senderId    Int         @map("sender_id")
+  content     String
+  type        MessageType @default(text)
+  
+  // Reply (цитирование)
+  replyToId   Int?        @map("reply_to_id")
+  
+  // File/Image/Voice attachments
+  fileUrl     String?     @map("file_url")
+  fileName    String?     @map("file_name")
+  fileSize    Int?        @map("file_size")
+  fileMimeType String?    @map("file_mime_type")
+  duration    Int?        // Для голосовых сообщений (в секундах)
+  
+  // E2E Encryption
+  isEncrypted Boolean     @default(false) @map("is_encrypted")
+  
+  // Editing
+  isEdited    Boolean     @default(false) @map("is_edited")
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  // Relations
+  room      Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender    User              @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo   Message?          @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies   Message[]         @relation("MessageReplies")
+  reactions MessageReaction[]
+
+  @@index([roomId, createdAt])
+  @@index([senderId])
+  @@index([replyToId])
+  @@map("messages")
+}
+
+model MessageReaction {
+  id        Int      @id @default(autoincrement())
+  messageId Int      @map("message_id")
+  userId    Int      @map("user_id")
+  emoji     String   // Эмодзи: 👍, ❤️, 😂, etc.
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@index([userId])
+  @@map("message_reactions")
+}
+
+model Call {
+  id          Int       @id @default(autoincrement())
+  roomId      Int       @map("room_id")
+  initiatorId Int       @map("initiator_id")
+  receiverId  Int?      @map("receiver_id") // Для DM звонков
+  startedAt   DateTime  @default(now()) @map("started_at")
+  endedAt     DateTime? @map("ended_at")
+  duration    Int?      // в секундах
+
+  // Relations
+  room     Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  initiator User @relation("CallInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  receiver   User? @relation("CallReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([initiatorId])
+  @@index([receiverId])
+  @@map("calls")
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  login        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([login])
+  @@map("admins")
+}
+

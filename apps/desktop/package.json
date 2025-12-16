@@ -1,0 +1,108 @@
+{
+  "name": "@woxly/desktop",
+  "version": "1.0.0",
+  "description": "Woxly Desktop - Windows приложение для голосового общения",
+  "main": "dist/main.js",
+  "author": "Woxly Team",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/woxly.git"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev:electron\" \"npm run dev:vite\"",
+    "dev:electron": "set NODE_ENV=development&& tsc -p tsconfig.electron.json && electron .",
+    "dev:vite": "cd ../frontend && npm run dev",
+    "build": "npm run build:frontend && npm run build:electron",
+    "build:frontend": "cd ../frontend && npm run build:desktop",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "package": "npm run build && electron-builder build --win --publish never",
+    "package:dir": "npm run build && electron-builder build --win --dir",
+    "dist": "npm run build && electron-builder build --win",
+    "start": "electron .",
+    "icons": "node build/convert-svg-to-icons.js && node build/create-web-icons.js",
+    "rebuild-icons": "node build/convert-svg-to-icons.js && node build/create-web-icons.js"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "sharp": "^0.34.5",
+    "to-ico": "^1.1.5",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10"
+  },
+  "build": {
+    "appId": "com.woxly.desktop",
+    "productName": "WOXLY",
+    "copyright": "Copyright © 2024 Woxly",
+    "electronVersion": "28.1.0",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-vite/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "publisherName": "Woxly",
+      "verifyUpdateCodeSignature": false,
+      "sign": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "WOXLY",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerSidebar": "build/installerSidebar.bmp",
+      "uninstallerSidebar": "build/installerSidebar.bmp",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "menuCategory": true,
+      "packElevateHelper": true,
+      "perMachine": false,
+      "differentialPackage": true,
+      "include": "build/installer.nsh"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "your-username",
+      "repo": "woxly"
+    },
+    "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      },
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ]
+  }
+}

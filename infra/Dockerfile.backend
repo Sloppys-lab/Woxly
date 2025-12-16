@@ -1,0 +1,30 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install dependencies
+RUN npm ci --workspace=apps/backend
+
+# Copy source
+COPY apps/backend ./apps/backend
+COPY packages/shared ./packages/shared
+COPY prisma ./prisma
+
+# Generate Prisma client
+WORKDIR /app/apps/backend
+RUN npx prisma generate
+
+# Build
+RUN npm run build
+
+# Expose port
+EXPOSE 3001
+
+# Start
+CMD ["npm", "start"]
+

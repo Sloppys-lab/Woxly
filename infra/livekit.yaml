@@ -1,0 +1,57 @@
+# LiveKit Server Configuration
+# https://docs.livekit.io/deploy/configuration/
+
+port: 7880
+bind_addresses:
+  - "0.0.0.0"
+
+rtc:
+  # UDP ports for WebRTC
+  port_range_start: 50000
+  port_range_end: 60000
+  # Use mDNS for local development
+  use_external_ip: false
+  # STUN servers
+  stun_servers:
+    - stun.l.google.com:19302
+    - stun1.l.google.com:19302
+
+# Redis для масштабирования (опционально)
+# redis:
+#   address: redis:6379
+
+# Логирование
+logging:
+  level: info
+  # Можно включить debug для отладки
+  # level: debug
+
+# Лимиты
+room:
+  # Максимум участников в комнате
+  max_participants: 100
+  # Таймаут пустой комнаты (секунды)
+  empty_timeout: 300
+  # Таймаут отключенного участника (секунды)
+  departure_timeout: 20
+
+# API ключи (будут переопределены через environment)
+keys:
+  devkey: secret
+
+# Webhook для событий (опционально)
+# webhook:
+#   urls:
+#     - http://backend:3001/api/livekit/webhook
+#   api_key: your-webhook-key
+
+# Регион (для распределенного развертывания)
+region: local
+
+# Turn servers (опционально, если нужен TURN)
+# turn:
+#   enabled: true
+#   domain: turn.yourdomain.com
+#   tls_port: 5349
+#   udp_port: 3478
+#   external_tls: true
