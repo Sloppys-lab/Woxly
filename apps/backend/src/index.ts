@@ -3,6 +3,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { prisma } from './db.js';
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -14,7 +16,18 @@ import adminAuthRoutes from './routes/adminAuth.js';
 import { setupSocketIO } from './socket/index.js';
 import { authMiddleware } from './middleware/auth.js';
 
-dotenv.config();
+// Определяем __dirname для ES модулей
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Загружаем .env файл с явным указанием пути
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
+
+console.log('Environment variables loaded from:', envPath);
+console.log('SMTP_USER:', process.env.SMTP_USER ? '✓ SET' : '✗ MISSING');
+console.log('SMTP_PASS:', process.env.SMTP_PASS ? '✓ SET' : '✗ MISSING');
+console.log('SMTP_HOST:', process.env.SMTP_HOST || 'default: smtp.gmail.com');
 
 const app = express();
 const httpServer = createServer(app);
