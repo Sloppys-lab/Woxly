@@ -1,0 +1,41 @@
+# Команды для деплоя исправления SMTP на сервер
+# Выполните эти команды последовательно на сервере
+
+# 1. Перейти в директорию проекта
+cd /var/www/woxly
+
+# 2. Подтянуть последние изменения из git
+git pull origin main
+
+# 3. Перейти в директорию backend
+cd apps/backend
+
+# 4. Установить зависимости (если нужно)
+npm install
+
+# 5. Собрать проект
+npm run build
+
+# 6. Проверить .env файл
+cat .env | grep SMTP
+
+# 7. Перезапустить PM2 с новым конфигом
+pm2 delete woxly-backend
+
+# 8. Запустить с ecosystem.config.cjs
+pm2 start ecosystem.config.cjs
+
+# 9. Сохранить конфигурацию PM2
+pm2 save
+
+# 10. Подождать несколько секунд
+sleep 3
+
+# 11. Проверить логи
+pm2 logs woxly-backend --lines 50 | grep -i "smtp\|environment"
+
+# 12. Тест отправки email (из другого терминала или после выхода из логов)
+curl -X POST https://woxly.ru/api/auth/request-password-reset -H "Content-Type: application/json" -d '{"email":"ilyalove130919@gmail.com"}'
+
+# 13. Проверить логи отправки
+pm2 logs woxly-backend --lines 20 | grep -i "email\|attempting"
