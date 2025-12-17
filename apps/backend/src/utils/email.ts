@@ -1,21 +1,36 @@
 import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
-// Проверяем наличие обязательных SMTP переменных
-if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.error('SMTP credentials are missing! Check SMTP_USER and SMTP_PASS environment variables.');
-  console.error('SMTP_USER:', process.env.SMTP_USER ? 'SET' : 'MISSING');
-  console.error('SMTP_PASS:', process.env.SMTP_PASS ? 'SET' : 'MISSING');
+// Ленивая инициализация транспортера (создаётся при первом использовании)
+let transporter: Transporter | null = null;
+
+function getTransporter(): Transporter {
+  if (!transporter) {
+    console.log('Creating SMTP transporter...');
+    console.log('SMTP Config:', {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: process.env.SMTP_PORT || 587,
+      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 5)}***` : 'MISSING',
+      pass: process.env.SMTP_PASS ? '***SET***' : 'MISSING',
+      from: process.env.SMTP_FROM,
+    });
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error('⚠️ SMTP credentials are missing! Check SMTP_USER and SMTP_PASS environment variables.');
+    }
+
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
+      },
+    });
+  }
+  return transporter;
 }
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-  },
-});
 
 export async function sendVerificationEmail(
   email: string,
@@ -68,19 +83,14 @@ export async function sendVerificationEmail(
   };
 
   try {
-    console.log(`Attempting to send ${purpose} email to ${email}`);
-    console.log('SMTP Config:', {
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      user: process.env.SMTP_USER ? '***' : 'MISSING',
-      pass: process.env.SMTP_PASS ? '***' : 'MISSING',
-      from: process.env.SMTP_FROM,
-    });
+    console.log(`📧 Attempting to send "${purpose}" email to ${email}`);
     
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${email}:`, info.messageId);
+    const transport = getTransporter();
+    const info = await transport.sendMail(mailOptions);
+    
+    console.log(`✅ Email sent successfully to ${email}:`, info.messageId);
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('❌ Email send error:', error);
     console.error('Failed to send email to:', email);
     console.error('SMTP credentials check:', {
       user: process.env.SMTP_USER ? 'SET' : 'MISSING',
