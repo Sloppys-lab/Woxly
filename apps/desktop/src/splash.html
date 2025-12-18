@@ -12,8 +12,8 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      background: #000000; /* Чистый черный */
       color: white;
       display: flex;
       align-items: center;
@@ -23,32 +23,8 @@
       position: relative;
     }
 
-    /* Пульсирующий радиальный градиент */
+    /* Радиальное свечение в центре (едва заметное) */
     body::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(82, 0, 20, 0.5), rgba(82, 0, 20, 0.2), transparent);
-      animation: pulseGradient 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseGradient {
-      0%, 100% { 
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.3;
-      }
-      50% { 
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0.5;
-      }
-    }
-
-    /* Вращающийся конический градиент */
-    body::after {
       content: '';
       position: absolute;
       top: 50%;
@@ -56,251 +32,187 @@
       transform: translate(-50%, -50%);
       width: 800px;
       height: 800px;
-      background: conic-gradient(from 0deg, #520014, transparent, #7a001f, transparent);
-      opacity: 0.2;
-      animation: rotateConic 20s linear infinite;
+      background: radial-gradient(circle, rgba(82, 0, 20, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulseGlow 4s ease-in-out infinite;
     }
 
-    @keyframes rotateConic {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
+    @keyframes pulseGlow {
+      0%, 100% { 
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.95);
+      }
+      50% { 
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.05);
+      }
     }
 
-    /* Плавающие частицы */
+    /* Световые лучи (едва заметные) */
+    .light-ray {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(255, 189, 211, 0.4), transparent);
+      filter: blur(1px);
+      opacity: 0;
+      animation: rayPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rayPulse {
+      0%, 100% { opacity: 0; transform: scaleY(0.8); }
+      50% { opacity: 0.03; transform: scaleY(1.2); }
+    }
+
+    .light-ray:nth-child(1) { left: 20%; animation-duration: 4s; animation-delay: 0s; }
+    .light-ray:nth-child(2) { left: 35%; animation-duration: 5s; animation-delay: 0.8s; }
+    .light-ray:nth-child(3) { left: 50%; animation-duration: 4.5s; animation-delay: 1.6s; }
+    .light-ray:nth-child(4) { left: 65%; animation-duration: 5.5s; animation-delay: 2.4s; }
+    .light-ray:nth-child(5) { left: 80%; animation-duration: 4.2s; animation-delay: 3.2s; }
+
+    /* Частицы (едва заметные) */
     .particle {
       position: absolute;
-      width: 4px;
-      height: 4px;
+      width: 1px;
+      height: 1px;
       background: #ffbdd3;
       border-radius: 50%;
-      opacity: 0.2;
-      animation: floatParticle 3s ease-in-out infinite;
+      box-shadow: 0 0 4px rgba(255, 189, 211, 0.6);
+      opacity: 0;
+      animation: floatParticle 8s ease-in-out infinite;
+      pointer-events: none;
     }
 
     @keyframes floatParticle {
-      0%, 100% { 
-        transform: translateY(0) translateX(0);
-        opacity: 0.2;
-      }
-      50% { 
-        transform: translateY(-30px) translateX(10px);
-        opacity: 0.6;
-      }
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.15; }
     }
 
-    .particle:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; animation-duration: 3.5s; }
-    .particle:nth-child(2) { top: 60%; left: 20%; animation-delay: 0.5s; animation-duration: 4s; }
-    .particle:nth-child(3) { top: 40%; right: 15%; animation-delay: 1s; animation-duration: 3.2s; }
-    .particle:nth-child(4) { top: 70%; right: 25%; animation-delay: 1.5s; animation-duration: 4.5s; }
-    .particle:nth-child(5) { top: 25%; left: 30%; animation-delay: 0.8s; animation-duration: 3.8s; }
-    .particle:nth-child(6) { top: 80%; left: 35%; animation-delay: 1.2s; animation-duration: 4.2s; }
+    .particle:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; animation-duration: 8.5s; }
+    .particle:nth-child(2) { top: 60%; left: 25%; animation-delay: 1.2s; animation-duration: 9s; }
+    .particle:nth-child(3) { top: 40%; right: 20%; animation-delay: 2.5s; animation-duration: 8.2s; }
+    .particle:nth-child(4) { top: 75%; right: 30%; animation-delay: 3.7s; animation-duration: 9.5s; }
+    .particle:nth-child(5) { top: 30%; left: 40%; animation-delay: 1.8s; animation-duration: 8.8s; }
 
+    /* Контейнер */
     .container {
-      text-align: center;
-      animation: fadeInScale 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       position: relative;
-      z-index: 1;
+      z-index: 10;
+      text-align: center;
+      animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      max-width: 500px;
+      padding: 60px 40px;
     }
 
     @keyframes fadeInScale {
       from { 
         opacity: 0; 
-        transform: scale(0.8) rotate(-10deg);
+        transform: scale(0.95);
       }
       to { 
         opacity: 1; 
-        transform: scale(1) rotate(0deg);
+        transform: scale(1);
       }
     }
 
-    /* Логотип с двойным текстом (тень + основной) */
-    .logo-wrapper {
-      position: relative;
-      margin-bottom: 60px;
-      display: inline-block;
-    }
-
-    .logo {
-      font-size: 72px;
-      font-weight: 900;
-      letter-spacing: 6px;
+    /* Glassmorphism контейнер для логотипа */
+    .logo-container {
       position: relative;
       display: inline-block;
-      animation: scaleRotate 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      padding: 48px;
+      margin-bottom: 48px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(40px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 60px rgba(255, 189, 211, 0.08);
     }
 
-    @keyframes scaleRotate {
-      from { 
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-      }
-      to { 
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-      }
-    }
-
-    /* Размытая тень для свечения */
-    .logo-shadow {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, #520014, #7a001f, #520014);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: blur(15px);
-      opacity: 0.5;
-      animation: shimmer 3s ease-in-out infinite;
-    }
-
-    /* Основной текст логотипа */
-    .logo-text {
-      position: relative;
-      background: linear-gradient(90deg, #520014, #7a001f, #520014);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Светящееся кольцо вокруг логотипа */
-    .logo-glow {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 160px;
-      height: 160px;
-      background: radial-gradient(circle, #520014, #7a001f);
-      border-radius: 50%;
-      filter: blur(40px);
-      opacity: 0.5;
-      animation: pulseGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { 
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.5;
-      }
-      50% { 
-        transform: translate(-50%, -50%) scale(1.1);
-        opacity: 0.8;
-      }
-    }
-
-    /* Вращающаяся рамка */
+    /* Пульсирующее кольцо вокруг логотипа */
     .logo-ring {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 180px;
-      height: 180px;
+      inset: -32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #520014, #6a0018, #7a001f);
-      padding: 3px;
-      animation: rotateRing 8s linear infinite;
+      border: 1px solid rgba(255, 189, 211, 0.15);
+      box-shadow: 0 0 40px rgba(255, 189, 211, 0.1);
+      animation: ringPulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+      pointer-events: none;
     }
 
-    @keyframes rotateRing {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .logo-ring::before {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      background: #0a0a0a;
-      border-radius: 50%;
-    }
-
-    /* Внутренняя вращающаяся граница */
-    .logo-inner-ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 4px solid transparent;
-      border-top-color: rgba(255, 189, 211, 0.5);
-      border-right-color: rgba(255, 189, 211, 0.3);
-      animation: rotateInnerRing 4s linear infinite;
-    }
-
-    @keyframes rotateInnerRing {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(-360deg); }
-    }
-
-    /* Орбитальные частицы */
-    .orbit-particle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 90px;
-      height: 90px;
-      animation: orbit 4s linear infinite;
-    }
-
-    @keyframes orbit {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .orbit-particle::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 6px;
-      height: 6px;
-      background: #ffbdd3;
-      border-radius: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 0 10px rgba(255, 189, 211, 0.5);
-      animation: particlePulse 2s ease-in-out infinite;
-    }
-
-    @keyframes particlePulse {
+    @keyframes ringPulse {
       0%, 100% { 
-        transform: translateX(-50%) scale(1);
-        opacity: 0.5;
+        opacity: 0;
+        transform: scale(0.9);
       }
       50% { 
-        transform: translateX(-50%) scale(1.5);
-        opacity: 1;
+        opacity: 0.2;
+        transform: scale(1.3);
       }
     }
 
-    .orbit-particle:nth-child(1) { animation-duration: 4s; }
-    .orbit-particle:nth-child(2) { animation-duration: 5s; animation-delay: 0.3s; }
-    .orbit-particle:nth-child(3) { animation-duration: 6s; animation-delay: 0.6s; }
-    .orbit-particle:nth-child(4) { animation-duration: 7s; animation-delay: 0.9s; }
-
-    .status {
-      font-size: 16px;
-      color: #9ca3af;
-      margin-bottom: 30px;
-      min-height: 24px;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      animation: fadeSlide 0.3s ease;
+    /* Вращающееся conic gradient свечение */
+    .logo-glow {
+      position: absolute;
+      inset: 12px;
+      border-radius: 24px;
+      background: conic-gradient(from 0deg, transparent, rgba(255, 189, 211, 0.3), transparent);
+      filter: blur(10px);
+      animation: rotateGlow 8s linear infinite, glowPulse 2s ease-in-out infinite;
+      pointer-events: none;
     }
 
-    @keyframes fadeSlide {
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Логотип текст */
+    .logo {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      font-size: 56px;
+      font-weight: 200; /* Ультра-тонкий */
+      letter-spacing: -0.02em; /* Tight spacing */
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 40px rgba(255, 189, 211, 0.2);
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { 
+        text-shadow: 0 0 40px rgba(255, 189, 211, 0.2);
+      }
+      50% { 
+        text-shadow: 0 0 60px rgba(255, 189, 211, 0.35);
+      }
+    }
+
+    /* Статус текст */
+    .status {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin-bottom: 32px;
+      min-height: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: statusFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes statusFade {
       from { 
         opacity: 0;
         transform: translateY(10px);
@@ -311,151 +223,93 @@
       }
     }
 
-    /* Убираем спиннер, так как есть анимации логотипа */
-    .spinner {
-      display: none;
+    /* Прогресс-бар контейнер */
+    .progress-container {
+      position: relative;
+      margin-bottom: 32px;
     }
 
     .progress-bar {
-      width: 350px;
-      height: 8px;
-      background: #1a1a1a;
+      width: 100%;
+      height: 4px;
       border-radius: 12px;
-      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
       overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
       position: relative;
-      box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.5),
-        0 0 10px rgba(82, 0, 20, 0.2);
-      border: 1px solid rgba(82, 0, 20, 0.3);
     }
 
+    /* Прогресс заполнение */
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #520014 0%, #7a001f 50%, #520014 100%);
-      background-size: 200% 100%;
-      border-radius: 12px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       width: 0%;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(82, 0, 20, 0.9) 0%, rgba(255, 189, 211, 0.9) 100%);
+      box-shadow: 0 0 20px rgba(255, 189, 211, 0.4);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      animation: progressShimmer 2s ease-in-out infinite;
-      box-shadow: 0 0 20px rgba(122, 0, 31, 0.6);
     }
 
-    @keyframes progressShimmer {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 100% 0%; }
-      100% { background-position: 0% 0%; }
-    }
-
-    /* Shimmer эффект поверх прогресса */
-    .progress-fill::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: skewX(-12deg);
-      animation: shimmerMove 1.5s ease-in-out infinite;
-    }
-
-    @keyframes shimmerMove {
-      from { transform: translateX(-100%) skewX(-12deg); }
-      to { transform: translateX(200%) skewX(-12deg); }
-    }
-
-    /* Свечение на прогрессе */
+    /* Shimmer эффект на прогрессе */
     .progress-fill::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(255, 189, 211, 0.3);
-      filter: blur(8px);
-      border-radius: 12px;
+      width: 50%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s linear infinite;
     }
 
-    /* Светящаяся точка-индикатор */
-    .progress-indicator {
-      position: absolute;
-      top: 50%;
-      left: 0%;
-      width: 16px;
-      height: 16px;
-      transform: translate(-50%, -50%);
-      transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(200%); }
     }
 
-    .progress-indicator::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: #ffbdd3;
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(255, 189, 211, 0.8);
-      animation: indicatorPulse 1.5s ease-out infinite;
-    }
-
-    @keyframes indicatorPulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.5;
-      }
-      50% {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
-
-    .progress-indicator::after {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      background: #ffbdd3;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255, 189, 211, 0.6);
-      animation: indicatorScale 1s ease-in-out infinite;
-    }
-
-    @keyframes indicatorScale {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-    }
-
-    /* Процент прогресса */
+    /* Процент */
     .progress-percent {
       position: absolute;
-      top: -28px;
+      top: -24px;
       right: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Mono", monospace;
       font-size: 12px;
-      color: #9ca3af;
-      font-weight: 600;
+      font-weight: 400;
       font-variant-numeric: tabular-nums;
-      transition: color 0.3s ease;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .progress-percent.active {
-      color: #ffbdd3;
-      transform: scale(1.3);
-      transition: all 0.3s ease;
+      background: linear-gradient(180deg, rgba(255, 189, 211, 0.95) 0%, rgba(255, 189, 211, 0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: scale(1.1);
     }
 
+    /* Версия */
     .version {
-      margin-top: 40px;
-      font-size: 12px;
-      color: #6b7280;
-      font-weight: 500;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Mono", monospace;
+      font-size: 11px;
+      font-weight: 400;
+      margin-top: 32px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       opacity: 0.7;
     }
 
-    /* Backdrop для модального окна обновления */
+    /* Backdrop для модального окна */
     .update-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
       display: none;
-      animation: fadeIn 0.3s ease;
-      z-index: 9;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 99;
     }
 
     .update-backdrop.show {
@@ -467,32 +321,34 @@
       to { opacity: 1; }
     }
 
+    /* Модальное окно обновления */
     .update-notification {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(40px);
+      width: 90%;
+      max-width: 420px;
       padding: 48px;
-      border-radius: 20px;
-      border: 1px solid rgba(82, 0, 20, 0.4);
-      box-shadow: 
-        0 20px 60px rgba(82, 0, 20, 0.4),
-        0 0 40px rgba(122, 0, 31, 0.2),
-        inset 0 1px 0 rgba(255, 189, 211, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(40px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 60px rgba(255, 189, 211, 0.15);
       text-align: center;
-      min-width: 480px;
-      max-width: 520px;
       display: none;
-      animation: modalSlideIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      z-index: 10;
+      animation: modalSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
     }
 
-    @keyframes modalSlideIn {
+    .update-notification.show {
+      display: block;
+    }
+
+    @keyframes modalSlide {
       from { 
         opacity: 0; 
-        transform: translate(-50%, -40%) scale(0.85);
+        transform: translate(-50%, -45%) scale(0.95);
       }
       to { 
         opacity: 1; 
@@ -500,125 +356,58 @@
       }
     }
 
-    .update-notification.show {
-      display: block;
-    }
-
     /* Иконка обновления */
-    .update-icon-wrapper {
-      position: relative;
-      width: 96px;
-      height: 96px;
-      margin: 0 auto 32px;
-      animation: iconAppear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s backwards;
-    }
-
-    @keyframes iconAppear {
-      from { 
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-      }
-      to { 
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-      }
-    }
-
-    /* Вращающееся кольцо вокруг иконки */
-    .update-icon-ring {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: rgba(255, 189, 211, 0.4);
-      border-right-color: rgba(255, 189, 211, 0.2);
-      animation: rotateIconRing 3s linear infinite;
-    }
-
-    @keyframes rotateIconRing {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
     .update-icon {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #520014 0%, #7a001f 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      animation: iconPulse 2s ease-in-out infinite;
-      box-shadow: 
-        0 0 30px rgba(122, 0, 31, 0.6),
-        0 0 60px rgba(82, 0, 20, 0.3),
-        inset 0 2px 10px rgba(255, 189, 211, 0.1);
+      font-size: 56px;
+      margin-bottom: 24px;
+      display: inline-block;
+      animation: iconFloat 3s ease-in-out infinite;
     }
 
-    @keyframes iconPulse {
-      0%, 100% { 
-        transform: scale(1);
-        box-shadow: 0 0 30px rgba(122, 0, 31, 0.6), 0 0 60px rgba(82, 0, 20, 0.3);
-      }
-      50% { 
-        transform: scale(1.05);
-        box-shadow: 0 0 40px rgba(122, 0, 31, 0.8), 0 0 80px rgba(82, 0, 20, 0.4);
-      }
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
+    /* Заголовок */
     .update-title {
-      font-size: 26px;
-      font-weight: 900;
-      margin-bottom: 16px;
-      color: #ffffff;
-      text-shadow: 0 4px 20px rgba(82, 0, 20, 0.4);
-      letter-spacing: -0.5px;
-    }
-
-    .update-version {
-      font-size: 20px;
-      font-weight: 700;
-      background: linear-gradient(90deg, #520014, #7a001f, #520014);
-      background-size: 200% 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      font-size: 24px;
+      font-weight: 200;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.7) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    /* Версия обновления */
+    .update-version {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Mono", monospace;
+      font-size: 18px;
+      font-weight: 400;
       margin-bottom: 20px;
-      animation: versionShimmer 3s ease-in-out infinite;
-      position: relative;
+      background: linear-gradient(180deg, rgba(255, 189, 211, 0.9) 0%, rgba(255, 189, 211, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    @keyframes versionShimmer {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Свечение под версией */
-    .update-version::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #ffbdd3, transparent);
-      opacity: 0.5;
-    }
-
+    /* Описание */
     .update-description {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       font-size: 14px;
-      color: #9ca3af;
+      font-weight: 400;
+      line-height: 1.6;
       margin-bottom: 32px;
-      line-height: 1.7;
-      max-width: 380px;
-      margin-left: auto;
-      margin-right: auto;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.4) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
+    /* Кнопки */
     .update-buttons {
       display: flex;
       gap: 12px;
@@ -627,75 +416,51 @@
     }
 
     .btn {
-      padding: 14px 32px;
-      border-radius: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 12px;
       border: none;
-      font-size: 14px;
-      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
     }
 
+    .btn:active {
+      transform: scale(0.98);
+    }
+
     .btn-primary {
-      background: linear-gradient(135deg, #520014 0%, #7a001f 100%);
-      color: white;
-      box-shadow: 0 6px 20px rgba(82, 0, 20, 0.4);
-      position: relative;
-    }
-
-    /* Shimmer эффект на кнопке */
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -200%;
-      width: 200%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-      animation: btnShimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes btnShimmer {
-      from { left: -200%; }
-      to { left: 200%; }
+      background: linear-gradient(180deg, rgba(255, 189, 211, 0.15) 0%, rgba(82, 0, 20, 0.3) 100%);
+      color: rgba(255, 189, 211, 0.95);
+      border: 1px solid rgba(255, 189, 211, 0.2);
+      box-shadow: 0 2px 10px rgba(255, 189, 211, 0.1);
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #6a0018 0%, #520014 100%);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(82, 0, 20, 0.6);
-    }
-
-    .btn-primary:active {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 15px rgba(82, 0, 20, 0.5);
+      background: linear-gradient(180deg, rgba(255, 189, 211, 0.2) 0%, rgba(82, 0, 20, 0.4) 100%);
+      box-shadow: 0 4px 20px rgba(255, 189, 211, 0.2);
+      transform: scale(1.01);
     }
 
     .btn-secondary {
-      background: rgba(26, 26, 26, 0.8);
-      color: #9ca3af;
-      border: 2px solid rgba(82, 0, 20, 0.3);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .btn-secondary:hover {
-      background: rgba(42, 42, 42, 0.8);
-      border-color: rgba(122, 0, 31, 0.5);
-      color: #ffffff;
-      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.8);
+      transform: scale(1.01);
     }
 
-    .btn-secondary:active {
-      transform: translateY(0);
-    }
-
+    /* Прогресс загрузки */
     .download-progress {
-      margin-top: 24px;
       display: none;
-      animation: fadeSlide 0.3s ease;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .download-progress.show {
@@ -703,17 +468,21 @@
     }
 
     .download-text {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       font-size: 13px;
-      color: #9ca3af;
+      font-weight: 400;
       margin-bottom: 16px;
-      font-weight: 600;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
     }
 
-    /* Анимированные точки загрузки */
+    /* Анимированные точки */
     .download-dots {
       display: inline-flex;
       gap: 4px;
@@ -722,7 +491,7 @@
     .download-dot {
       width: 4px;
       height: 4px;
-      background: #ffbdd3;
+      background: rgba(255, 189, 211, 0.8);
       border-radius: 50%;
       animation: dotPulse 1s ease-in-out infinite;
     }
@@ -744,175 +513,91 @@
 
     .download-bar {
       width: 100%;
-      height: 10px;
-      background: #1a1a1a;
+      height: 4px;
       border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
       overflow: hidden;
-      box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.5),
-        0 0 10px rgba(82, 0, 20, 0.2);
-      border: 1px solid rgba(82, 0, 20, 0.3);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
       position: relative;
     }
 
     .download-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #520014 0%, #7a001f 50%, #520014 100%);
-      background-size: 200% 100%;
-      border-radius: 12px;
       width: 0%;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: downloadShimmer 2s ease-in-out infinite;
-      box-shadow: 0 0 20px rgba(122, 0, 31, 0.6);
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(82, 0, 20, 0.9) 0%, rgba(255, 189, 211, 0.9) 100%);
+      box-shadow: 0 0 20px rgba(255, 189, 211, 0.4);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
 
-    @keyframes downloadShimmer {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 100% 0%; }
-      100% { background-position: 0% 0%; }
-    }
-
-    /* Shimmer overlay */
-    .download-bar-fill::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-      transform: skewX(-12deg);
-      animation: downloadShimmerMove 1.5s ease-in-out infinite;
-    }
-
-    @keyframes downloadShimmerMove {
-      from { transform: translateX(-100%) skewX(-12deg); }
-      to { transform: translateX(200%) skewX(-12deg); }
-    }
-
-    /* Свечение */
     .download-bar-fill::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(255, 189, 211, 0.3);
-      filter: blur(8px);
-      border-radius: 12px;
-    }
-
-    /* Индикатор на прогрессе загрузки */
-    .download-indicator {
-      position: absolute;
-      top: 50%;
-      left: 0%;
-      width: 14px;
-      height: 14px;
-      transform: translate(-50%, -50%);
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-    }
-
-    .download-indicator::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: #ffbdd3;
-      border-radius: 50%;
-      box-shadow: 0 0 12px rgba(255, 189, 211, 0.8);
-      animation: downloadIndicatorPulse 1.5s ease-out infinite;
-    }
-
-    @keyframes downloadIndicatorPulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.5;
-      }
-      50% {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
-
-    .download-indicator::after {
-      content: '';
-      position: absolute;
-      inset: 2px;
-      background: #ffbdd3;
-      border-radius: 50%;
-      box-shadow: 0 0 8px rgba(255, 189, 211, 0.6);
-      animation: downloadIndicatorScale 1.5s ease-in-out infinite;
-    }
-
-    @keyframes downloadIndicatorScale {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.3); }
+      width: 50%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s linear infinite;
     }
   </style>
 </head>
 <body>
-  <!-- Плавающие частицы -->
-  <div class="particle"></div>
+  <!-- Световые лучи (едва заметные) -->
+  <div class="light-ray"></div>
+  <div class="light-ray"></div>
+  <div class="light-ray"></div>
+  <div class="light-ray"></div>
+  <div class="light-ray"></div>
+
+  <!-- Частицы (едва заметные) -->
   <div class="particle"></div>
   <div class="particle"></div>
   <div class="particle"></div>
   <div class="particle"></div>
   <div class="particle"></div>
 
+  <!-- Основной контейнер -->
   <div class="container">
-    <!-- Логотип с анимациями -->
-    <div class="logo-wrapper">
-      <!-- Светящееся кольцо -->
-      <div class="logo-glow"></div>
-      <!-- Вращающаяся рамка -->
+    <!-- Логотип с glassmorphism -->
+    <div class="logo-container">
       <div class="logo-ring"></div>
-      <!-- Внутренняя вращающаяся граница -->
-      <div class="logo-inner-ring"></div>
-      <!-- Орбитальные частицы -->
-      <div class="orbit-particle" style="animation-delay: 0s;"></div>
-      <div class="orbit-particle" style="animation-delay: 0.3s;"></div>
-      <div class="orbit-particle" style="animation-delay: 0.6s;"></div>
-      <div class="orbit-particle" style="animation-delay: 0.9s;"></div>
-      <!-- Текст логотипа -->
-      <div class="logo">
-        <div class="logo-shadow">WOXLY</div>
-        <div class="logo-text">WOXLY</div>
-      </div>
+      <div class="logo-glow"></div>
+      <div class="logo">WOXLY</div>
     </div>
 
-    <div class="spinner"></div>
+    <!-- Статус -->
     <div class="status" id="status">Загрузка приложения...</div>
     
-    <!-- Прогресс-бар с индикатором -->
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress"></div>
-      <div class="progress-indicator" id="progressIndicator"></div>
+    <!-- Прогресс-бар -->
+    <div class="progress-container">
       <div class="progress-percent" id="progressPercent">0%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
     </div>
     
+    <!-- Версия -->
     <div class="version" id="version">v1.0.0</div>
   </div>
 
-  <!-- Backdrop для модального окна -->
+  <!-- Backdrop -->
   <div class="update-backdrop" id="updateBackdrop"></div>
 
-  <!-- Уведомление об обновлении -->
+  <!-- Модальное окно обновления -->
   <div class="update-notification" id="updateNotification">
-    <div class="update-icon-wrapper">
-      <div class="update-icon-ring"></div>
-      <div class="update-icon">🎉</div>
-    </div>
-    <div class="update-title">Доступно обновление!</div>
-    <div class="update-version" id="updateVersion">v1.0.2</div>
+    <div class="update-icon">✨</div>
+    <div class="update-title">Доступно обновление</div>
+    <div class="update-version" id="updateVersion">v1.0.7</div>
     <div class="update-description" id="updateDescription">
-      Новая версия WOXLY готова к установке. Обновление включает исправления ошибок и новые функции.
+      Новая версия готова к установке. Обновление включает улучшения производительности и исправления.
     </div>
     <div class="update-buttons">
-      <button class="btn btn-primary" id="btnUpdate">
-        <span style="position: relative; z-index: 1;">Обновить сейчас</span>
-      </button>
+      <button class="btn btn-primary" id="btnUpdate">Обновить</button>
       <button class="btn btn-secondary" id="btnLater">Позже</button>
     </div>
     <div class="download-progress" id="downloadProgress">
       <div class="download-text">
-        <span id="downloadText">Загрузка обновления: 0%</span>
+        <span id="downloadText">Загрузка: 0%</span>
         <div class="download-dots">
           <div class="download-dot"></div>
           <div class="download-dot"></div>
@@ -921,7 +606,6 @@
       </div>
       <div class="download-bar">
         <div class="download-bar-fill" id="downloadBar"></div>
-        <div class="download-indicator" id="downloadIndicator"></div>
       </div>
     </div>
   </div>
@@ -935,20 +619,18 @@
       statusEl.style.animation = 'none';
       setTimeout(() => {
         statusEl.textContent = message;
-        statusEl.style.animation = 'fadeSlide 0.3s ease';
+        statusEl.style.animation = 'statusFade 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
       }, 10);
     });
 
-    // Обновление прогресса с индикатором и процентом
+    // Обновление прогресса
     ipcRenderer.on('splash-progress', (event, percent) => {
       const progressFill = document.getElementById('progress');
-      const progressIndicator = document.getElementById('progressIndicator');
       const progressPercent = document.getElementById('progressPercent');
       
       progressFill.style.width = percent + '%';
-      progressIndicator.style.left = percent + '%';
       
-      // Обновление процента с анимацией
+      // Анимация процента
       const oldPercent = parseInt(progressPercent.textContent);
       if (Math.floor(percent) !== oldPercent) {
         progressPercent.classList.add('active');
@@ -973,24 +655,22 @@
       document.getElementById('updateVersion').textContent = 'v' + info.version;
     });
 
-    // Прогресс загрузки обновления
+    // Прогресс загрузки
     ipcRenderer.on('download-progress', (event, progressObj) => {
       const downloadProgress = document.getElementById('downloadProgress');
       downloadProgress.classList.add('show');
       
       const percent = Math.round(progressObj.percent);
       const downloadBar = document.getElementById('downloadBar');
-      const downloadIndicator = document.getElementById('downloadIndicator');
       
-      document.getElementById('downloadText').textContent = `Загрузка обновления: ${percent}%`;
+      document.getElementById('downloadText').textContent = `Загрузка: ${percent}%`;
       downloadBar.style.width = percent + '%';
-      downloadIndicator.style.left = percent + '%';
       
-      // Скрыть кнопки во время загрузки
+      // Скрыть кнопки
       document.querySelector('.update-buttons').style.display = 'none';
     });
 
-    // Кнопка "Обновить сейчас"
+    // Кнопка "Обновить"
     document.getElementById('btnUpdate').addEventListener('click', () => {
       ipcRenderer.send('start-update');
     });
@@ -1002,4 +682,3 @@
   </script>
 </body>
 </html>
-
