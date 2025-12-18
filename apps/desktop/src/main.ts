@@ -86,10 +86,10 @@ function createWindow() {
     console.log('[MAIN] Page loaded successfully');
   });
 
-  // Показываем окно когда готово
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
-  });
+  // НЕ показываем окно автоматически - покажем после закрытия splash
+  // mainWindow.once('ready-to-show', () => {
+  //   mainWindow?.show();
+  // });
 
   // Обработка закрытия окна
   mainWindow.on('close', (event) => {
