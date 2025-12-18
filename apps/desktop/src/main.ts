@@ -10,12 +10,17 @@ let mainWindow: BrowserWindow | null = null;
 let splashWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let isQuitting = false;
+let splashStartTime = 0; // Время начала показа splash
+const MIN_SPLASH_DURATION = 4000; // Минимум 4 секунды показа
 
 // URL сервера
 const SERVER_URL = process.env.VITE_API_URL || 'https://woxly.ru';
 
 // Создание splash screen
 function createSplashWindow() {
+  splashStartTime = Date.now(); // Запоминаем время старта
+  console.log('[SPLASH] Creating splash screen...');
+  
   splashWindow = new BrowserWindow({
     width: 500,
     height: 350,
@@ -36,6 +41,7 @@ function createSplashWindow() {
 
   // Установить версию
   splashWindow.webContents.once('did-finish-load', () => {
+    console.log('[SPLASH] Splash loaded, version:', app.getVersion());
     splashWindow?.webContents.send('splash-version', app.getVersion());
   });
 }
@@ -220,26 +226,37 @@ function setupAutoLaunch() {
 
 // Проверка обновлений при запуске (для splash)
 function checkForUpdatesOnStart() {
+  console.log('[UPDATER] Starting update check...');
+  
   if (process.env.NODE_ENV !== 'development') {
     // Настройки автообновления
     autoUpdater.autoDownload = false; // Не загружаем автоматически при старте
     autoUpdater.autoInstallOnAppQuit = true;
     
+    console.log('[UPDATER] Current version:', app.getVersion());
+    console.log('[UPDATER] Checking for updates from GitHub...');
+    
     // Обновление найдено
     autoUpdater.on('update-available', (info) => {
-      console.log('[UPDATER] Update available:', info.version);
+      console.log('[UPDATER] ✅ Update available:', info.version);
       if (splashWindow) {
+        splashWindow.webContents.send('splash-status', 'Найдено обновление!');
+        splashWindow.webContents.send('splash-progress', 100);
         splashWindow.webContents.send('update-available', info);
       }
     });
 
     // Обновление не найдено
     autoUpdater.on('update-not-available', () => {
-      console.log('[UPDATER] No updates available');
+      console.log('[UPDATER] ✅ No updates available - app is up to date');
+      if (splashWindow) {
+        splashWindow.webContents.send('splash-status', 'Приложение актуально');
+        splashWindow.webContents.send('splash-progress', 100);
+      }
       // Закрываем splash и открываем главное окно
       setTimeout(() => {
         closeSplashAndShowMain();
-      }, 1000);
+      }, 1500);
     });
 
     // Прогресс загрузки
@@ -252,7 +269,7 @@ function checkForUpdatesOnStart() {
 
     // Обновление загружено
     autoUpdater.on('update-downloaded', (info) => {
-      console.log('[UPDATER] Update downloaded:', info.version);
+      console.log('[UPDATER] ✅ Update downloaded:', info.version);
       // Автоматически устанавливаем после закрытия
       setTimeout(() => {
         autoUpdater.quitAndInstall(false, true);
@@ -261,11 +278,15 @@ function checkForUpdatesOnStart() {
 
     // Ошибка обновления
     autoUpdater.on('error', (error) => {
-      console.error('[UPDATER] Error:', error);
+      console.error('[UPDATER] ❌ Error checking for updates:', error.message);
+      if (splashWindow) {
+        splashWindow.webContents.send('splash-status', 'Проверка завершена');
+        splashWindow.webContents.send('splash-progress', 100);
+      }
       // При ошибке просто открываем приложение
       setTimeout(() => {
         closeSplashAndShowMain();
-      }, 1000);
+      }, 1500);
     });
 
     // Проверяем обновления
@@ -275,28 +296,43 @@ function checkForUpdatesOnStart() {
     }
     
     setTimeout(() => {
-      autoUpdater.checkForUpdates();
+      console.log('[UPDATER] Initiating check for updates...');
+      autoUpdater.checkForUpdates().catch((err) => {
+        console.error('[UPDATER] Failed to check for updates:', err);
+      });
     }, 1500);
   } else {
-    // В режиме разработки сразу открываем главное окно
-    setTimeout(() => {
-      closeSplashAndShowMain();
-    }, 2000);
+    console.log('[UPDATER] Development mode - skipping update check');
+    if (splashWindow) {
+      splashWindow.webContents.send('splash-status', 'Режим разработки');
+      splashWindow.webContents.send('splash-progress', 100);
+    }
+    // В режиме разработки тоже ждем минимальное время
+    closeSplashAndShowMain();
   }
 }
 
 // Закрыть splash и показать главное окно
 function closeSplashAndShowMain() {
-  if (splashWindow) {
-    splashWindow.close();
-    splashWindow = null;
-  }
+  const elapsed = Date.now() - splashStartTime;
+  const remaining = Math.max(0, MIN_SPLASH_DURATION - elapsed);
   
-  if (!mainWindow) {
-    createWindow();
-  } else {
-    mainWindow.show();
-  }
+  console.log(`[SPLASH] Closing splash (elapsed: ${elapsed}ms, waiting: ${remaining}ms)`);
+  
+  // Ждем минимальное время показа splash
+  setTimeout(() => {
+    if (splashWindow) {
+      console.log('[SPLASH] Splash closed, showing main window');
+      splashWindow.close();
+      splashWindow = null;
+    }
+    
+    if (!mainWindow) {
+      createWindow();
+    } else {
+      mainWindow.show();
+    }
+  }, remaining);
 }
 
 // Проверка обновлений в фоне (после запуска)
@@ -369,32 +405,44 @@ ipcMain.on('skip-update', () => {
 
 // Инициализация приложения
 app.whenReady().then(() => {
+  console.log('[APP] Application ready, starting initialization...');
+  
   // Показываем splash screen
   createSplashWindow();
   
   // Имитируем начальную загрузку
   setTimeout(() => {
     if (splashWindow) {
-      splashWindow.webContents.send('splash-status', 'Загрузка приложения...');
-      splashWindow.webContents.send('splash-progress', 30);
+      console.log('[SPLASH] Step 1: Initializing...');
+      splashWindow.webContents.send('splash-status', 'Инициализация...');
+      splashWindow.webContents.send('splash-progress', 20);
     }
   }, 500);
   
   // Создаем главное окно (но не показываем)
   setTimeout(() => {
+    console.log('[APP] Creating main window...');
     createWindow();
-  }, 1000);
+    if (splashWindow) {
+      splashWindow.webContents.send('splash-status', 'Загрузка приложения...');
+      splashWindow.webContents.send('splash-progress', 40);
+    }
+  }, 1200);
   
   // Создаем трей
   setTimeout(() => {
+    console.log('[APP] Creating tray and setting up auto-launch...');
     createTray();
     setupAutoLaunch();
-  }, 1500);
+    if (splashWindow) {
+      splashWindow.webContents.send('splash-progress', 60);
+    }
+  }, 1800);
   
   // Проверяем обновления
   setTimeout(() => {
     checkForUpdatesOnStart();
-  }, 2000);
+  }, 2200);
 
   // Настраиваем фоновые обновления (после запуска)
   setTimeout(() => {
