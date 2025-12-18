@@ -22,14 +22,15 @@ function createSplashWindow() {
   console.log('[SPLASH] Creating splash screen...');
   
   splashWindow = new BrowserWindow({
-    width: 500,
-    height: 350,
+    width: 520,
+    height: 380,
     frame: false,
-    transparent: false,
-    backgroundColor: '#1a1a1a',
+    transparent: true, // Для rounded corners
+    backgroundColor: '#00000000', // Прозрачный фон
     resizable: false,
     center: true,
     alwaysOnTop: true,
+    hasShadow: true, // Тень окна
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
