@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOXLY Loading</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      font-size: 56px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #dc143c, #ff4d6d, #ff6b9d, #ff4d6d, #dc143c);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient 3s ease infinite;
+      margin-bottom: 40px;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .status {
+      font-size: 16px;
+      color: #b9bbbe;
+      margin-bottom: 30px;
+      min-height: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 20px;
+      border: 4px solid rgba(220, 20, 60, 0.1);
+      border-top-color: #dc143c;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .progress-bar {
+      width: 300px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #dc143c, #ff4d6d);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .version {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #72767d;
+    }
+
+    .update-notification {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #2b2d31;
+      padding: 40px;
+      border-radius: 12px;
+      border: 1px solid #404249;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      min-width: 400px;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translate(-50%, -45%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    .update-notification.show {
+      display: block;
+    }
+
+    .update-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #dc143c, #ff4d6d);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .update-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .update-version {
+      font-size: 18px;
+      color: #dc143c;
+      margin-bottom: 20px;
+    }
+
+    .update-description {
+      font-size: 14px;
+      color: #b9bbbe;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .update-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #dc143c;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #b01030;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #b9bbbe;
+      border: 1px solid #404249;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .download-progress {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .download-progress.show {
+      display: block;
+    }
+
+    .download-text {
+      font-size: 14px;
+      color: #b9bbbe;
+      margin-bottom: 10px;
+    }
+
+    .download-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .download-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #dc143c, #ff4d6d);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">WOXLY</div>
+    <div class="spinner"></div>
+    <div class="status" id="status">Загрузка приложения...</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    <div class="version" id="version">v1.0.0</div>
+  </div>
+
+  <div class="update-notification" id="updateNotification">
+    <div class="update-icon">🎉</div>
+    <div class="update-title">Доступно обновление!</div>
+    <div class="update-version" id="updateVersion">v1.0.2</div>
+    <div class="update-description" id="updateDescription">
+      Новая версия WOXLY готова к установке. Обновление включает исправления ошибок и новые функции.
+    </div>
+    <div class="update-buttons">
+      <button class="btn btn-primary" id="btnUpdate">Обновить сейчас</button>
+      <button class="btn btn-secondary" id="btnLater">Позже</button>
+    </div>
+    <div class="download-progress" id="downloadProgress">
+      <div class="download-text" id="downloadText">Загрузка обновления: 0%</div>
+      <div class="download-bar">
+        <div class="download-bar-fill" id="downloadBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    // Обновление статуса
+    ipcRenderer.on('splash-status', (event, message) => {
+      document.getElementById('status').textContent = message;
+    });
+
+    // Обновление прогресса
+    ipcRenderer.on('splash-progress', (event, percent) => {
+      document.getElementById('progress').style.width = percent + '%';
+    });
+
+    // Установка версии
+    ipcRenderer.on('splash-version', (event, version) => {
+      document.getElementById('version').textContent = 'v' + version;
+    });
+
+    // Показать уведомление об обновлении
+    ipcRenderer.on('update-available', (event, info) => {
+      document.querySelector('.container').style.display = 'none';
+      const notification = document.getElementById('updateNotification');
+      notification.classList.add('show');
+      document.getElementById('updateVersion').textContent = 'v' + info.version;
+    });
+
+    // Прогресс загрузки обновления
+    ipcRenderer.on('download-progress', (event, progressObj) => {
+      const downloadProgress = document.getElementById('downloadProgress');
+      downloadProgress.classList.add('show');
+      
+      const percent = Math.round(progressObj.percent);
+      document.getElementById('downloadText').textContent = `Загрузка обновления: ${percent}%`;
+      document.getElementById('downloadBar').style.width = percent + '%';
+      
+      // Скрыть кнопки во время загрузки
+      document.querySelector('.update-buttons').style.display = 'none';
+    });
+
+    // Кнопка "Обновить сейчас"
+    document.getElementById('btnUpdate').addEventListener('click', () => {
+      ipcRenderer.send('start-update');
+    });
+
+    // Кнопка "Позже"
+    document.getElementById('btnLater').addEventListener('click', () => {
+      ipcRenderer.send('skip-update');
+    });
+  </script>
+</body>
+</html>

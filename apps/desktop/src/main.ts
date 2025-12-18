@@ -7,11 +7,38 @@ import * as path from 'path';
 const store = new Store();
 
 let mainWindow: BrowserWindow | null = null;
+let splashWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let isQuitting = false;
 
 // URL сервера
 const SERVER_URL = process.env.VITE_API_URL || 'https://woxly.ru';
+
+// Создание splash screen
+function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 500,
+    height: 350,
+    frame: false,
+    transparent: false,
+    backgroundColor: '#1a1a1a',
+    resizable: false,
+    center: true,
+    alwaysOnTop: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  const splashPath = path.join(__dirname, 'splash.html');
+  splashWindow.loadFile(splashPath);
+
+  // Установить версию
+  splashWindow.webContents.once('did-finish-load', () => {
+    splashWindow?.webContents.send('splash-version', app.getVersion());
+  });
+}
 
 // Создание главного окна
 function createWindow() {
@@ -191,83 +218,94 @@ function setupAutoLaunch() {
   }
 }
 
-// Проверка обновлений
-function checkForUpdates() {
+// Проверка обновлений при запуске (для splash)
+function checkForUpdatesOnStart() {
   if (process.env.NODE_ENV !== 'development') {
     // Настройки автообновления
-    autoUpdater.autoDownload = true;
+    autoUpdater.autoDownload = false; // Не загружаем автоматически при старте
     autoUpdater.autoInstallOnAppQuit = true;
-    
-    // Проверяем обновления каждые 4 часа
-    setInterval(() => {
-      autoUpdater.checkForUpdates();
-    }, 4 * 60 * 60 * 1000);
-    
-    // Первая проверка через 10 секунд после запуска
-    setTimeout(() => {
-      autoUpdater.checkForUpdates();
-    }, 10000);
     
     // Обновление найдено
     autoUpdater.on('update-available', (info) => {
       console.log('[UPDATER] Update available:', info.version);
-      if (Notification.isSupported() && mainWindow) {
-        new Notification({
-          title: '🎉 Доступно обновление',
-          body: `Новая версия ${info.version} загружается...`,
-          icon: path.join(__dirname, '../build/icon.png'),
-        }).show();
-        
-        // Отправляем событие в renderer
-        mainWindow.webContents.send('update-available', info);
+      if (splashWindow) {
+        splashWindow.webContents.send('update-available', info);
       }
     });
 
     // Обновление не найдено
-    autoUpdater.on('update-not-available', (info) => {
-      console.log('[UPDATER] Update not available. Current version:', info.version);
+    autoUpdater.on('update-not-available', () => {
+      console.log('[UPDATER] No updates available');
+      // Закрываем splash и открываем главное окно
+      setTimeout(() => {
+        closeSplashAndShowMain();
+      }, 1000);
     });
 
     // Прогресс загрузки
     autoUpdater.on('download-progress', (progressObj) => {
-      const message = `Загружено ${Math.round(progressObj.percent)}%`;
-      console.log('[UPDATER]', message);
-      
-      if (mainWindow) {
-        mainWindow.webContents.send('update-progress', progressObj);
+      console.log('[UPDATER] Download progress:', Math.round(progressObj.percent), '%');
+      if (splashWindow) {
+        splashWindow.webContents.send('download-progress', progressObj);
       }
     });
 
     // Обновление загружено
     autoUpdater.on('update-downloaded', (info) => {
       console.log('[UPDATER] Update downloaded:', info.version);
-      
-      if (Notification.isSupported()) {
-        const notification = new Notification({
-          title: '✅ Обновление готово',
-          body: `Версия ${info.version} готова к установке. Нажмите для перезапуска.`,
-          icon: path.join(__dirname, '../build/icon.png'),
-        });
-        
-        notification.on('click', () => {
-          autoUpdater.quitAndInstall(false, true);
-        });
-        
-        notification.show();
-      }
-      
-      if (mainWindow) {
-        mainWindow.webContents.send('update-downloaded', info);
-      }
+      // Автоматически устанавливаем после закрытия
+      setTimeout(() => {
+        autoUpdater.quitAndInstall(false, true);
+      }, 1000);
     });
 
     // Ошибка обновления
     autoUpdater.on('error', (error) => {
       console.error('[UPDATER] Error:', error);
-      if (mainWindow) {
-        mainWindow.webContents.send('update-error', error.message);
-      }
+      // При ошибке просто открываем приложение
+      setTimeout(() => {
+        closeSplashAndShowMain();
+      }, 1000);
     });
+
+    // Проверяем обновления
+    if (splashWindow) {
+      splashWindow.webContents.send('splash-status', 'Проверка обновлений...');
+      splashWindow.webContents.send('splash-progress', 50);
+    }
+    
+    setTimeout(() => {
+      autoUpdater.checkForUpdates();
+    }, 1500);
+  } else {
+    // В режиме разработки сразу открываем главное окно
+    setTimeout(() => {
+      closeSplashAndShowMain();
+    }, 2000);
+  }
+}
+
+// Закрыть splash и показать главное окно
+function closeSplashAndShowMain() {
+  if (splashWindow) {
+    splashWindow.close();
+    splashWindow = null;
+  }
+  
+  if (!mainWindow) {
+    createWindow();
+  } else {
+    mainWindow.show();
+  }
+}
+
+// Проверка обновлений в фоне (после запуска)
+function setupBackgroundUpdates() {
+  if (process.env.NODE_ENV !== 'development') {
+    // Проверяем обновления каждые 4 часа
+    setInterval(() => {
+      autoUpdater.checkForUpdates();
+    }, 4 * 60 * 60 * 1000);
   }
 }
 
@@ -318,12 +356,50 @@ ipcMain.handle('install-update', () => {
   autoUpdater.quitAndInstall(false, true);
 });
 
+// Обработчики для splash screen
+ipcMain.on('start-update', () => {
+  // Начинаем загрузку обновления
+  autoUpdater.downloadUpdate();
+});
+
+ipcMain.on('skip-update', () => {
+  // Пропускаем обновление и открываем главное окно
+  closeSplashAndShowMain();
+});
+
 // Инициализация приложения
 app.whenReady().then(() => {
-  createWindow();
-  createTray();
-  setupAutoLaunch();
-  checkForUpdates();
+  // Показываем splash screen
+  createSplashWindow();
+  
+  // Имитируем начальную загрузку
+  setTimeout(() => {
+    if (splashWindow) {
+      splashWindow.webContents.send('splash-status', 'Загрузка приложения...');
+      splashWindow.webContents.send('splash-progress', 30);
+    }
+  }, 500);
+  
+  // Создаем главное окно (но не показываем)
+  setTimeout(() => {
+    createWindow();
+  }, 1000);
+  
+  // Создаем трей
+  setTimeout(() => {
+    createTray();
+    setupAutoLaunch();
+  }, 1500);
+  
+  // Проверяем обновления
+  setTimeout(() => {
+    checkForUpdatesOnStart();
+  }, 2000);
+
+  // Настраиваем фоновые обновления (после запуска)
+  setTimeout(() => {
+    setupBackgroundUpdates();
+  }, 10000);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

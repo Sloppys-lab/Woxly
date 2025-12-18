@@ -1,6 +1,6 @@
 {
   "name": "@woxly/desktop",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Woxly Desktop - Windows приложение для голосового общения",
   "main": "dist/main.js",
   "author": "Woxly Team",
@@ -8,21 +8,23 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/woxly.git"
+    "url": "https://github.com/Sloppys-lab/Woxly.git"
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:electron\" \"npm run dev:vite\"",
     "dev:electron": "set NODE_ENV=development&& tsc -p tsconfig.electron.json && electron .",
     "dev:vite": "cd ../frontend && npm run dev",
-    "build": "npm run build:frontend && npm run build:electron",
+    "build": "npm run build:frontend && npm run build:electron && npm run copy:splash",
     "build:frontend": "cd ../frontend && npm run build:desktop",
     "build:electron": "tsc -p tsconfig.electron.json",
+    "copy:splash": "node -e \"require('fs').copyFileSync('src/splash.html', 'dist/splash.html')\"",
     "package": "npm run build && electron-builder build --win --publish never",
     "package:dir": "npm run build && electron-builder build --win --dir",
-    "dist": "npm run build && electron-builder build --win",
+    "dist": "npm run build && electron-builder build --win && node increment-version.js",
     "start": "electron .",
     "icons": "node build/convert-svg-to-icons.js && node build/create-web-icons.js",
-    "rebuild-icons": "node build/convert-svg-to-icons.js && node build/create-web-icons.js"
+    "rebuild-icons": "node build/convert-svg-to-icons.js && node build/create-web-icons.js",
+    "version:increment": "node increment-version.js"
   },
   "dependencies": {
     "electron-store": "^8.1.0",
@@ -91,8 +93,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "your-username",
-      "repo": "woxly"
+      "owner": "Sloppys-lab",
+      "repo": "Woxly"
     },
     "extraResources": [
       {
