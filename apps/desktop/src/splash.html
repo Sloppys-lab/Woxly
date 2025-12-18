@@ -21,65 +21,6 @@
       height: 100vh;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая граница */
-      border-radius: 16px; /* Скругленные углы */
-    }
-
-    /* Draggable titlebar (невидимая зона для перетаскивания) */
-    .titlebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 48px;
-      -webkit-app-region: drag; /* Позволяет перетаскивать окно */
-      z-index: 1000;
-      pointer-events: auto;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
-    }
-
-    /* Close button */
-    .close-btn {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      -webkit-app-region: no-drag; /* Кнопка не перетаскивает окно */
-      z-index: 1001;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 0;
-      animation: fadeInBtn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
-    }
-
-    @keyframes fadeInBtn {
-      to { opacity: 1; }
-    }
-
-    .close-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: scale(1.05);
-    }
-
-    .close-btn:active {
-      transform: scale(0.95);
-    }
-
-    .close-btn svg {
-      width: 14px;
-      height: 14px;
-      opacity: 0.6;
-    }
-
-    .close-btn:hover svg {
-      opacity: 1;
     }
 
     /* Радиальное свечение в центре (едва заметное) */
@@ -601,17 +542,6 @@
   </style>
 </head>
 <body>
-  <!-- Draggable titlebar -->
-  <div class="titlebar"></div>
-  
-  <!-- Close button -->
-  <button class="close-btn" id="closeBtn" title="Закрыть">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  </button>
-
   <!-- Световые лучи (едва заметные) -->
   <div class="light-ray"></div>
   <div class="light-ray"></div>
@@ -682,11 +612,6 @@
 
   <script>
     const { ipcRenderer } = require('electron');
-
-    // Кнопка закрытия
-    document.getElementById('closeBtn').addEventListener('click', () => {
-      ipcRenderer.send('skip-update');
-    });
 
     // Обновление статуса с анимацией
     ipcRenderer.on('splash-status', (event, message) => {

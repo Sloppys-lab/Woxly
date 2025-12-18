@@ -24,13 +24,15 @@ function createSplashWindow() {
   splashWindow = new BrowserWindow({
     width: 520,
     height: 380,
-    frame: false,
-    transparent: true, // Для rounded corners
-    backgroundColor: '#00000000', // Прозрачный фон
+    frame: true, // Нативная рамка Windows
+    transparent: false,
+    backgroundColor: '#000000', // Черный фон
     resizable: false,
     center: true,
     alwaysOnTop: true,
-    hasShadow: true, // Тень окна
+    title: 'WOXLY', // Заголовок окна
+    minimizable: false, // Убираем кнопку сворачивания
+    maximizable: false, // Убираем кнопку разворачивания
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
