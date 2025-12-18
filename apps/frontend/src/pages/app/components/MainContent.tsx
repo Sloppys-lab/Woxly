@@ -639,12 +639,12 @@ export default function MainContent() {
 
   if (!activeRoom) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-background">
-        {/* Центрируем относительно правой части (от sidebar до правого края) */}
-        <div className="text-center space-y-6 animate-fade-in" style={{ marginLeft: '-128px' }}>
-          {/* WOXLY с анимацией переливания */}
+      <div className="flex flex-1 items-center justify-center bg-background px-4">
+        {/* Центрируем без жесткого отступа - адаптивно */}
+        <div className="text-center space-y-6 animate-fade-in max-w-3xl w-full">
+          {/* WOXLY с анимацией переливания - адаптивный размер */}
           <h1 
-            className="text-9xl font-bold"
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold"
             style={{
               background: 'linear-gradient(90deg, #dc143c 0%, #ff4d6d 25%, #dc143c 50%, #ff4d6d 75%, #dc143c 100%)',
               backgroundSize: '200% 100%',
@@ -657,13 +657,13 @@ export default function MainContent() {
             WOXLY
           </h1>
           
-          {/* Начните общение прямо сейчас! */}
-          <p className="text-3xl font-medium" style={{ color: '#dc143c' }}>
+          {/* Начните общение прямо сейчас! - адаптивный размер */}
+          <p className="text-xl sm:text-2xl md:text-3xl font-medium px-4" style={{ color: '#dc143c' }}>
             Начните общение прямо сейчас!
           </p>
           
-          {/* Дополнительный текст */}
-          <p className="text-muted-foreground text-xl max-w-md mx-auto">
+          {/* Дополнительный текст - адаптивный размер */}
+          <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-md mx-auto px-4">
             Выберите друга и начните голосовой чат или отправьте сообщение
           </p>
         </div>

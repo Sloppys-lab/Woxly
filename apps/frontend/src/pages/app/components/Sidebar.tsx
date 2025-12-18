@@ -604,12 +604,12 @@ export default function Sidebar() {
 
       {/* User Profile */}
       {user && (
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-3">
           <div 
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setSettingsOpen(true)}
           >
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <Avatar
                 src={getAvatarUrl(user.avatarUrl)}
                 fallback={user.username[0].toUpperCase()}
@@ -619,19 +619,19 @@ export default function Sidebar() {
                 <StatusDot status={user.status} size="sm" />
               </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <p className="text-sm font-medium text-foreground truncate leading-tight">
                 {user.username}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate leading-tight mt-0.5">
                 {user.woxlyId}
               </p>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-shrink-0">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className={`h-8 w-8 p-0 transition-colors ${isMicMuted ? 'text-destructive hover:text-destructive' : ''}`}
+                className={`h-8 w-8 p-0 flex-shrink-0 transition-colors ${isMicMuted ? 'text-destructive hover:text-destructive' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleMic();
@@ -643,7 +643,7 @@ export default function Sidebar() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className={`h-8 w-8 p-0 transition-colors ${isDeafened ? 'text-destructive hover:text-destructive' : ''}`}
+                className={`h-8 w-8 p-0 flex-shrink-0 transition-colors ${isDeafened ? 'text-destructive hover:text-destructive' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleDeafen();

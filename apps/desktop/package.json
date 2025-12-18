@@ -1,6 +1,6 @@
 {
   "name": "@woxly/desktop",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Woxly Desktop - Windows приложение для голосового общения",
   "main": "dist/main.js",
   "author": "Woxly Team",
