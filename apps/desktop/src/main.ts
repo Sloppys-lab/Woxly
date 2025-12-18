@@ -22,17 +22,14 @@ function createSplashWindow() {
   console.log('[SPLASH] Creating splash screen...');
   
   splashWindow = new BrowserWindow({
-    width: 520,
-    height: 380,
-    frame: true, // Нативная рамка Windows
+    width: 540,
+    height: 400,
+    frame: false, // Без нативной рамки
     transparent: false,
-    backgroundColor: '#000000', // Черный фон
+    backgroundColor: '#000000',
     resizable: false,
     center: true,
     alwaysOnTop: true,
-    title: 'WOXLY', // Заголовок окна
-    minimizable: false, // Убираем кнопку сворачивания
-    maximizable: false, // Убираем кнопку разворачивания
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -404,6 +401,15 @@ ipcMain.on('start-update', () => {
 ipcMain.on('skip-update', () => {
   // Пропускаем обновление и открываем главное окно
   closeSplashAndShowMain();
+});
+
+ipcMain.on('close-splash', () => {
+  // Закрываем splash окно
+  if (splashWindow) {
+    splashWindow.close();
+    splashWindow = null;
+  }
+  app.quit();
 });
 
 // Инициализация приложения

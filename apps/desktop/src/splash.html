@@ -13,7 +13,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-      background: #000000; /* Чистый черный */
+      background: #000000;
       color: white;
       display: flex;
       align-items: center;
@@ -21,6 +21,100 @@
       height: 100vh;
       overflow: hidden;
       position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* Custom titlebar */
+    .titlebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      -webkit-app-region: drag;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+    }
+
+    .titlebar-title {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .titlebar-controls {
+      display: flex;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar-button {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .titlebar-button::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .titlebar-button:hover::before {
+      opacity: 1;
+    }
+
+    .titlebar-button:active {
+      transform: scale(0.9);
+    }
+
+    .btn-close {
+      background: rgba(255, 95, 109, 0.3);
+      border: 1px solid rgba(255, 95, 109, 0.4);
+    }
+
+    .btn-close:hover {
+      background: rgba(255, 95, 109, 0.5);
+      border-color: rgba(255, 95, 109, 0.6);
+    }
+
+    /* Close icon */
+    .btn-close::after {
+      content: '×';
+      position: absolute;
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-close:hover::after {
+      opacity: 1;
     }
 
     /* Радиальное свечение в центре (едва заметное) */
@@ -542,6 +636,14 @@
   </style>
 </head>
 <body>
+  <!-- Custom titlebar -->
+  <div class="titlebar">
+    <div class="titlebar-title">WOXLY</div>
+    <div class="titlebar-controls">
+      <button class="titlebar-button btn-close" id="closeBtn" title="Закрыть"></button>
+    </div>
+  </div>
+
   <!-- Световые лучи (едва заметные) -->
   <div class="light-ray"></div>
   <div class="light-ray"></div>
@@ -612,6 +714,14 @@
 
   <script>
     const { ipcRenderer } = require('electron');
+
+    // Кнопка закрытия
+    const closeBtn = document.getElementById('closeBtn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        ipcRenderer.send('close-splash');
+      });
+    }
 
     // Обновление статуса с анимацией
     ipcRenderer.on('splash-status', (event, message) => {
