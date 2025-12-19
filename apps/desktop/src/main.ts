@@ -22,14 +22,15 @@ function createSplashWindow() {
   console.log('[SPLASH] Creating splash screen...');
   
   splashWindow = new BrowserWindow({
-    width: 540,
-    height: 400,
-    frame: false, // Без нативной рамки
-    transparent: false,
-    backgroundColor: '#000000',
+    width: 400,
+    height: 300,
+    frame: false, // Полностью без рамок (как Discord)
+    transparent: true, // Прозрачный для fade эффектов
+    backgroundColor: '#00000000',
     resizable: false,
     center: true,
     alwaysOnTop: true,
+    hasShadow: false, // Без тени
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -43,6 +44,11 @@ function createSplashWindow() {
   splashWindow.webContents.once('did-finish-load', () => {
     console.log('[SPLASH] Splash loaded, version:', app.getVersion());
     splashWindow?.webContents.send('splash-version', app.getVersion());
+    
+    // Показать skip кнопку в dev режиме
+    if (process.env.NODE_ENV === 'development') {
+      splashWindow?.webContents.send('dev-mode');
+    }
   });
 }
 
