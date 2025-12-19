@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '@woxly/ui';
+import { Button, cn } from '@woxly/ui';
 import { Users, MessageSquare, Search, Mic, MicOff, Headphones, VolumeX, UserPlus, X, MoreVertical, Pin, Trash2 } from 'lucide-react';
-import { cn } from '../../../utils/cn';
 import { useAuthStore } from '../../../store/authStore';
 import { useFriendsStore } from '../../../store/friendsStore';
 import { useRoomsStore } from '../../../store/roomsStore';

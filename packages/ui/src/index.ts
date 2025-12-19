@@ -11,4 +11,5 @@ export type { ChatBubbleProps } from './ChatBubble';
 export { VoiceParticipantCard } from './VoiceParticipantCard';
 export { Slider } from './Slider';
 export { ScrollArea } from './ScrollArea';
+export { cn } from './utils';
 
