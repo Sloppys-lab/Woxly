@@ -463,10 +463,10 @@ export default function Sidebar() {
                   return (
                 <div
                   key={result.id}
-                  className="mb-2 flex items-center gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer hover:border-primary/50 transition-colors"
+                  className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2.5 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => setSelectedUserId(result.id)}
                 >
-                      <div className="relative">
+                      <div className="relative flex-shrink-0">
                         <Avatar
                           src={getAvatarUrl(result.avatarUrl)}
                           fallback={result.username[0].toUpperCase()}
@@ -476,49 +476,44 @@ export default function Sidebar() {
                           <StatusDot status={result.status} size="sm" />
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <p className="text-sm font-medium text-foreground truncate leading-tight">
                           {result.username}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate leading-tight">
                           {result.woxlyId}
                         </p>
                       </div>
                       {alreadyFriend ? (
-                        <span className="text-xs text-muted-foreground">В друзьях</span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0">В друзьях</span>
                       ) : (
-                        <>
+                        <div className="flex gap-1 flex-shrink-0">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-8 px-2"
+                            className="h-7 w-7 p-0"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedUserId(result.id);
                             }}
+                            title="Профиль"
                           >
-                            Профиль
+                            <UserPlus className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="default"
                             size="sm"
-                            className="h-8 px-3"
+                            className="h-7 px-2.5 text-xs"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleAddFriend(result.id);
                             }}
                             disabled={addingFriendId === result.id}
+                            title="Добавить в друзья"
                           >
-                            {addingFriendId === result.id ? (
-                              '...'
-                            ) : (
-                              <>
-                                <UserPlus className="mr-1 h-3 w-3" />
-                                Добавить
-                              </>
-                            )}
+                            {addingFriendId === result.id ? '...' : '+'}
                           </Button>
-                        </>
+                        </div>
                       )}
                     </div>
                   );
