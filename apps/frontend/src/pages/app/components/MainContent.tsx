@@ -363,13 +363,12 @@ export default function MainContent() {
   const handleSendMessage = () => {
     if (!messageText.trim() || !activeRoom || !socket) return;
 
-    // Отправляем сообщение через store
-    // Используем spread для передачи опционального параметра
-    const messageParams: [number, string, number?] = replyTo?.id 
-      ? [activeRoom.id, messageText, replyTo.id]
-      : [activeRoom.id, messageText];
-    
-    sendMessage(...messageParams);
+    // Type assertion для обхода устаревших типов на сервере
+    (sendMessage as (roomId: number, content: string, replyToId?: number) => void)(
+      activeRoom.id, 
+      messageText, 
+      replyTo?.id
+    );
     
     setMessageText('');
     setReplyTo(null);
