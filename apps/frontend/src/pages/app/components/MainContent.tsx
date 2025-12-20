@@ -722,10 +722,10 @@ export default function MainContent() {
       </div>
 
       {/* Chat */}
-      <div className="flex flex-1 flex-col relative overflow-hidden">
-        {/* Call Modal - показывается в верхней части комнаты */}
+      <div className="flex flex-1 flex-col min-h-0">
+        {/* Call Modal - показывается в верхней части, занимает половину экрана */}
         {(showCallModal && callUser) || (showIncomingCallModal && incomingCallUser) ? (
-          <div className="absolute top-0 left-0 right-0 h-1/2 z-40 bg-background border-b border-primary/30">
+          <div className="flex-shrink-0 h-1/2 bg-background border-b border-primary/30">
             <CallModal
               open={showCallModal || showIncomingCallModal}
               onClose={() => {
@@ -753,9 +753,9 @@ export default function MainContent() {
           </div>
         ) : null}
         
-        {/* Chat area - всегда снизу, не сдвигается, БЕЗ обрезки углов */}
-        <div className="flex flex-col h-[50vh] absolute bottom-0 left-0 right-0 z-30">
-          <div className="flex-1 border border-primary/20 rounded-lg backdrop-blur-sm m-4 overflow-hidden flex flex-col">
+        {/* Chat area - занимает все оставшееся пространство */}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 border border-primary/20 rounded-lg backdrop-blur-sm m-4 overflow-hidden flex flex-col min-h-0">
             <ScrollArea className="flex-1">
               <div className="p-4">
                 {roomMessages.length === 0 ? (

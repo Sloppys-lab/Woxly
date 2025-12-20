@@ -56,15 +56,15 @@ export default function RightPanel() {
 
   // Убрали "Нет активной комнаты" - просто показываем пустую панель
   return (
-    <div className="w-64 border-l border-border bg-background flex flex-col">
+    <div className="w-64 h-full border-l border-border bg-background flex flex-col">
       {activeRoom && activeRoom.members && (
         <>
-          <div className="border-b border-border p-4">
+          <div className="border-b border-border p-4 flex-shrink-0">
             <h3 className="text-sm font-semibold text-foreground">
               Участники ({sortedMembers.length})
             </h3>
           </div>
-          <div className="overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 min-h-0">
             <div className="space-y-2">
               {sortedMembers.map((member) => {
                 const isSpeaking = speakingUsers.has(member.userId);
