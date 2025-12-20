@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
 import { useSocketStore } from '../store/socketStore';
 import { useMessagesStore } from '../store/messagesStore';
+import { useRoomsStore } from '../store/roomsStore';
 import type { Message } from '@woxly/shared';
 
 export function useSocketMessages() {
   const { socket } = useSocketStore();
   const { messages, fetchMessages } = useMessagesStore();
+  const { fetchRooms } = useRoomsStore();
 
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (message: Message) => {
+      console.log('[useSocketMessages] New message received:', message);
+      
       useMessagesStore.setState((state) => {
         const roomMessages = state.messages[message.roomId] || [];
         
@@ -54,6 +58,11 @@ export function useSocketMessages() {
           };
         }
       });
+
+      // Обновляем список комнат для обновления lastMessage и unreadCount
+      setTimeout(() => {
+        fetchRooms();
+      }, 100);
     };
 
     socket.on('new-message', handleNewMessage);
@@ -61,7 +70,7 @@ export function useSocketMessages() {
     return () => {
       socket.off('new-message', handleNewMessage);
     };
-  }, [socket]);
+  }, [socket, fetchRooms]);
 
   return { messages, fetchMessages };
 }

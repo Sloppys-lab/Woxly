@@ -26,6 +26,9 @@ interface FriendsState {
   declineFriend: (friendshipId: number) => Promise<void>;
   removeFriend: (friendId: number) => Promise<void>;
   updateFriendStatus: (userId: number, status: UserStatus) => void;
+  addFriendRequest: (request: FriendRequest) => void;
+  removeFriendRequest: (friendshipId: number) => void;
+  addFriendToList: (friend: Friend) => void;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -87,10 +90,12 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
       // Если запрос был автоматически принят, обновляем список друзей
       if (response.data.autoAccepted) {
         await get().fetchFriends();
-      } else {
-        // Иначе просто обновляем список запросов (если нужно)
-        await get().fetchFriendRequests();
       }
+      // Всегда обновляем оба списка для синхронизации
+      await Promise.all([
+        get().fetchFriends(),
+        get().fetchFriendRequests()
+      ]);
       // Очищаем результаты поиска после добавления
       set({ searchResults: [] });
     } catch (error: any) {
@@ -147,6 +152,31 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
       friends: updatedFriends,
       searchResults: updatedSearchResults 
     });
+  },
+
+  addFriendRequest: (request: FriendRequest) => {
+    const { friendRequests } = get();
+    // Проверяем, нет ли уже такого запроса
+    const exists = friendRequests.some(req => req.id === request.id);
+    if (!exists) {
+      set({ friendRequests: [...friendRequests, request] });
+    }
+  },
+
+  removeFriendRequest: (friendshipId: number) => {
+    const { friendRequests } = get();
+    set({ 
+      friendRequests: friendRequests.filter(req => req.friendshipId !== friendshipId) 
+    });
+  },
+
+  addFriendToList: (friend: Friend) => {
+    const { friends } = get();
+    // Проверяем, нет ли уже такого друга
+    const exists = friends.some(f => f.id === friend.id);
+    if (!exists) {
+      set({ friends: [...friends, friend] });
+    }
   },
 }));
 

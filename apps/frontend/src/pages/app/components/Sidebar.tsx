@@ -25,7 +25,19 @@ const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined 
 
 export default function Sidebar() {
   const { user } = useAuthStore();
-  const { friends, friendRequests, searchResults, searchUsers, addFriend, fetchFriends, updateFriendStatus } = useFriendsStore();
+  const { 
+    friends, 
+    friendRequests, 
+    searchResults, 
+    searchUsers, 
+    addFriend, 
+    fetchFriends, 
+    fetchFriendRequests,
+    updateFriendStatus,
+    addFriendRequest,
+    removeFriendRequest,
+    addFriendToList
+  } = useFriendsStore();
   const { rooms, createOrGetDirectRoom, setActiveRoom, activeRoom } = useRoomsStore();
   const { socket } = useSocketStore();
   const [activeTab, setActiveTab] = useState<'friends' | 'rooms'>('friends');
@@ -154,19 +166,78 @@ export default function Sidebar() {
       // Обновляем статусы друзей при подключении
       setTimeout(() => {
         fetchFriends();
+        fetchFriendRequests();
       }, 300);
+    };
+
+    // Новая заявка в друзья получена
+    const handleFriendRequestReceived = (data: { request: any }) => {
+      console.log('Sidebar: Friend request received:', data);
+      const request: FriendRequest = {
+        id: data.request.id,
+        friendshipId: data.request.id,
+        from: data.request.user || data.request.from,
+        createdAt: data.request.createdAt
+      };
+      addFriendRequest(request);
+      // Также обновляем список для синхронизации
+      setTimeout(() => {
+        fetchFriendRequests();
+      }, 100);
+    };
+
+    // Друг добавлен (когда кто-то принял вашу заявку)
+    const handleFriendAdded = (data: { friend: any }) => {
+      console.log('Sidebar: Friend added:', data);
+      addFriendToList(data.friend);
+      // Обновляем оба списка
+      setTimeout(() => {
+        fetchFriends();
+        fetchFriendRequests();
+      }, 100);
+    };
+
+    // Заявка принята
+    const handleFriendAccepted = (data: { friendshipId: number; friend: any }) => {
+      console.log('Sidebar: Friend accepted:', data);
+      removeFriendRequest(data.friendshipId);
+      if (data.friend) {
+        addFriendToList(data.friend);
+      }
+      // Обновляем оба списка
+      setTimeout(() => {
+        fetchFriends();
+        fetchFriendRequests();
+      }, 100);
+    };
+
+    // Заявка отклонена
+    const handleFriendDeclined = (data: { friendshipId: number }) => {
+      console.log('Sidebar: Friend declined:', data);
+      removeFriendRequest(data.friendshipId);
+      setTimeout(() => {
+        fetchFriendRequests();
+      }, 100);
     };
 
     socket.on('friend-status-changed', handleFriendStatusChanged);
     socket.on('friend-profile-updated', handleFriendProfileUpdated);
     socket.on('connect', handleSocketConnect);
+    socket.on('friend-request-received', handleFriendRequestReceived);
+    socket.on('friend-added', handleFriendAdded);
+    socket.on('friend-accepted', handleFriendAccepted);
+    socket.on('friend-declined', handleFriendDeclined);
 
     return () => {
       socket.off('friend-status-changed', handleFriendStatusChanged);
       socket.off('friend-profile-updated', handleFriendProfileUpdated);
       socket.off('connect', handleSocketConnect);
+      socket.off('friend-request-received', handleFriendRequestReceived);
+      socket.off('friend-added', handleFriendAdded);
+      socket.off('friend-accepted', handleFriendAccepted);
+      socket.off('friend-declined', handleFriendDeclined);
     };
-  }, [socket, updateFriendStatus, fetchFriends]);
+  }, [socket, updateFriendStatus, fetchFriends, fetchFriendRequests, addFriendRequest, removeFriendRequest, addFriendToList]);
   
   // Периодическое обновление статусов друзей (каждые 30 секунд)
   useEffect(() => {
@@ -462,57 +533,43 @@ export default function Sidebar() {
                   return (
                 <div
                   key={result.id}
-                  className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2.5 cursor-pointer hover:border-primary/50 transition-colors"
+                  className="mb-1.5 flex items-center gap-1.5 rounded-lg border border-border bg-card p-2 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => setSelectedUserId(result.id)}
                 >
                       <div className="relative flex-shrink-0">
                         <Avatar
                           src={getAvatarUrl(result.avatarUrl)}
                           fallback={result.username[0].toUpperCase()}
-                          size="default"
+                          size="sm"
                         />
                         <div className="absolute -bottom-0.5 -right-0.5">
                           <StatusDot status={result.status} size="sm" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
-                        <p className="text-sm font-medium text-foreground truncate leading-tight">
+                        <p className="text-xs font-medium text-foreground truncate leading-tight">
                           {result.username}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate leading-tight">
+                        <p className="text-[10px] text-muted-foreground truncate leading-tight">
                           {result.woxlyId}
                         </p>
                       </div>
                       {alreadyFriend ? (
-                        <span className="text-xs text-muted-foreground flex-shrink-0">В друзьях</span>
+                        <span className="text-[10px] text-muted-foreground flex-shrink-0 px-1">✓</span>
                       ) : (
-                        <div className="flex gap-1 flex-shrink-0">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 w-7 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedUserId(result.id);
-                            }}
-                            title="Профиль"
-                          >
-                            <UserPlus className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="h-7 px-2.5 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddFriend(result.id);
-                            }}
-                            disabled={addingFriendId === result.id}
-                            title="Добавить в друзья"
-                          >
-                            {addingFriendId === result.id ? '...' : '+'}
-                          </Button>
-                        </div>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="h-6 w-6 p-0 flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddFriend(result.id);
+                          }}
+                          disabled={addingFriendId === result.id}
+                          title="Добавить в друзья"
+                        >
+                          {addingFriendId === result.id ? '...' : <UserPlus className="h-3 w-3" />}
+                        </Button>
                       )}
                     </div>
                   );

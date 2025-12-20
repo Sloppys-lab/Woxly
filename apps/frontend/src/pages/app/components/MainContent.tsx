@@ -375,8 +375,17 @@ export default function MainContent() {
   };
 
   const handleCall = async () => {
+    console.log('[CALL] Button clicked');
+    
     if (!activeRoom || !socket || !user) {
-      console.error('Missing required data for call:', { activeRoom, socket, user });
+      console.error('[CALL] Missing required data:', { activeRoom, socket: !!socket, user: !!user });
+      alert('Ошибка: не удалось инициировать звонок');
+      return;
+    }
+    
+    if (!socket.connected) {
+      console.error('[CALL] Socket not connected');
+      alert('Ошибка: нет подключения к серверу');
       return;
     }
     
@@ -388,15 +397,25 @@ export default function MainContent() {
     
     const otherUser = getOtherUser(activeRoom);
     if (!otherUser) {
+      console.error('[CALL] Other user not found in room:', activeRoom);
       alert('Не удалось найти собеседника');
       return;
     }
 
+    console.log('[CALL] Checking for active call with user:', otherUser.id);
+
     // Проверяем, есть ли уже активный звонок с этим пользователем
     socket.emit('check-active-call', { friendId: otherUser.id });
     
+    // Таймаут на случай, если сервер не ответит
+    const timeout = setTimeout(() => {
+      console.log('[CALL] No response from server, starting call anyway');
+      handleNoActiveCall({ friendId: otherUser.id });
+    }, 3000);
+    
     // Обработчик ответа о наличии активного звонка
     const handleActiveCallFound = async ({ friendId, roomId }: { friendId: number; roomId?: number }) => {
+      clearTimeout(timeout);
       if (friendId === otherUser.id) {
         // Присоединяемся к существующему звонку
         console.log('[CALL] Joining existing call with user:', friendId);
@@ -419,6 +438,7 @@ export default function MainContent() {
     };
 
     const handleNoActiveCall = async ({ friendId }: { friendId: number }) => {
+      clearTimeout(timeout);
       if (friendId === otherUser.id) {
         // Создаем новый звонок - используем текущую комнату
         console.log('[CALL] Starting new call with user:', friendId);
