@@ -363,11 +363,16 @@ export default function MainContent() {
   const handleSendMessage = () => {
     if (!messageText.trim() || !activeRoom || !socket) return;
 
-    if (replyTo?.id) {
-      sendMessageAction(activeRoom.id, messageText, replyTo.id);
-    } else {
-      sendMessageAction(activeRoom.id, messageText);
+    // Отправляем сообщение через socket напрямую (обход проблемы с TypeScript)
+    const { socket: sock } = useSocketStore.getState();
+    if (sock) {
+      sock.emit('send-message', {
+        roomId: activeRoom.id,
+        content: messageText,
+        replyToId: replyTo?.id
+      });
     }
+    
     setMessageText('');
     setReplyTo(null);
   };
