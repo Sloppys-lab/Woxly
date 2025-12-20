@@ -39,7 +39,7 @@ const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined 
 export default function MainContent() {
   const { activeRoom, fetchRooms } = useRoomsStore();
   const { user } = useAuthStore();
-  const { messages, sendMessage: sendMessageAction, fetchMessages } = useMessagesStore();
+  const { messages, sendMessage, fetchMessages } = useMessagesStore();
   const { socket } = useSocketStore();
   const [messageText, setMessageText] = useState('');
   const [showCallModal, setShowCallModal] = useState(false);
@@ -363,14 +363,12 @@ export default function MainContent() {
   const handleSendMessage = () => {
     if (!messageText.trim() || !activeRoom || !socket) return;
 
-    // Отправляем сообщение через socket напрямую (обход проблемы с TypeScript)
-    const { socket: sock } = useSocketStore.getState();
-    if (sock) {
-      sock.emit('send-message', {
-        roomId: activeRoom.id,
-        content: messageText,
-        replyToId: replyTo?.id
-      });
+    // Вызываем sendMessage с правильной типизацией
+    const replyId = replyTo?.id;
+    if (replyId !== undefined) {
+      sendMessage(activeRoom.id, messageText, replyId);
+    } else {
+      sendMessage(activeRoom.id, messageText);
     }
     
     setMessageText('');
