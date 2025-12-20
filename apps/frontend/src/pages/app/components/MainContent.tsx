@@ -363,7 +363,7 @@ export default function MainContent() {
   const handleSendMessage = () => {
     if (!messageText.trim() || !activeRoom || !socket) return;
 
-    sendMessageAction(activeRoom.id, messageText, replyTo?.id);
+    sendMessageAction(activeRoom.id, messageText, replyTo?.id ?? undefined);
     setMessageText('');
     setReplyTo(null);
   };

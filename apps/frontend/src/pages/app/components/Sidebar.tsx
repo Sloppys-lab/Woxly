@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button, cn } from '@woxly/ui';
 import { Users, MessageSquare, Search, Mic, MicOff, Headphones, VolumeX, UserPlus, X, MoreVertical, Pin, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
-import { useFriendsStore } from '../../../store/friendsStore';
+import { useFriendsStore, type FriendRequest } from '../../../store/friendsStore';
 import { useRoomsStore } from '../../../store/roomsStore';
 import { useSocketStore } from '../../../store/socketStore';
 import { Input } from '@woxly/ui';
